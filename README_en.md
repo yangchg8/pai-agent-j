@@ -1,17 +1,28 @@
 # PAI-Agent
 
-**A production-grade, event-driven AI Agent framework built with Java 23, implementing the ReAct (Reasoning + Acting) architecture for autonomous task execution.**
-
-PAI-Agent provides a complete infrastructure for building intelligent agents that reason about tasks, invoke tools, manage conversational memory, and interact with users through a streaming CLI -- all coordinated by an asynchronous publish/subscribe event bus.
+**An event-driven AI Agent framework built with Java and the OpenAI SDK, implementing the ReAct (Reasoning + Acting) architecture. Supports session state management, context management, tool permission management, dynamic SKILL loading, and MCP protocol. Ships with a CLI-based general-purpose intelligent agent, using SQLite and local files for session persistence.**
 
 ---
 
-## Highlights
+## Core Design Highlights
 
-- **Event-Driven Pub/Sub Architecture** -- Brain and Tools subscribe to a central event bus at the same level, enabling flat, decoupled coordination with concurrent tool execution and automatic retry
-- **Multi-Region Memory System** -- Five specialized memory regions (System, Chat, Plan, Skill, MCP) with automatic context compression when tokens exceed 90% of the context window
+### 1. Asynchronous Event-Driven Flat Architecture
+
+Brain and Tools subscribe to the event bus at the same level, enabling a flat, decoupled coordination mechanism with concurrent tool execution via configurable thread pools and automatic retry. The flat architecture design unifies the timing of Agent state data **interruption, resumption, and persistence** into the event message publish/consume phases, avoiding the state maintenance difficulties found in graph-based Agent frameworks like LangGraph.
+
+### 2. Reactive Memory Region Design
+
+Features a reactive memory region design with five specialized memory regions (System, Chat, Plan, Skill, MCP), where each memory region can be bound to corresponding context tools. When context tools modify their bound memory region content, the **model context is automatically updated**. This reactive context design greatly simplifies the complex LLM context assembly operations, with automatic compression when tokens exceed 90% of the context window.
+
+### 3. Resource-Path Based Tool Permission System
+
+All tool permissions are unified through **resource paths (Resource) and permission scopes (readable, writable, executable)**. Tools can define semantic explanations of resource paths and permission scopes within their context, and use the LLM to generate corresponding authorization options (LLM-Based), or directly specify authorization options via rules (Rule-Based). Supports session-level permission accumulation and global pre-authorization.
+
+---
+
+## Additional Features
+
 - **Annotation-Driven Tool Framework** -- Define tools with `@Tool`, `@ToolParameter`, and `@ToolPermissionChecker` annotations; discovered and registered automatically via reflection
-- **Three-Mode Authorization System** -- LLM-based, rule-based, and direct-rejection authorization modes with session-level permission accumulation and global pre-authorization
 - **MCP (Model Context Protocol) Integration** -- First-class support for third-party tools via stdio, SSE, and Streamable HTTP transports with dynamic discovery
 - **Session Persistence** -- SQLite-backed session storage with atomic snapshots, state restoration, and automatic repair of interrupted tool calls
 - **Streaming CLI** -- JLine-based terminal with real-time LLM output rendering, multiline input, command auto-completion, and interactive authorization prompts
@@ -133,16 +144,18 @@ public ToolPermissionResult readFilePermissionCheck(
 
 ### Tool Permission System
 
-Permissions are modeled as **Resource + Operation**:
-- Resources: `FILE:/path`, `DIR:/path/**`, `COMMAND:git`
-- Operations: `READ`, `WRITE`, `DELETE`, `EXECUTE`, `ALL`
+All tool permissions are unified through **Resource Path + Permission Scope (Operation)**:
+- Resource paths: `FILE:/path`, `DIR:/path/**`, `COMMAND:git`
+- Permission scopes: `READ`, `WRITE`, `DELETE`, `EXECUTE`, `ALL`
+
+Tools can define semantic explanations of resource paths and permission scopes within their context, and the LLM generates corresponding authorization options; alternatively, rules can directly specify authorization options.
 
 Three authorization modes:
 
 | Mode | Behavior |
 |------|----------|
-| `LLM_BASED` | LLM generates explanation; user confirms interactively |
-| `RULE_BASED` | Pre-defined rules authorize or reject automatically |
+| `LLM_BASED` | Tool declares resource path and permission scope explanations; LLM generates authorization options accordingly; user confirms interactively |
+| `RULE_BASED` | Rules directly specify authorization options; authorize or reject automatically |
 | `REJECTED` | Direct rejection without further processing |
 
 Session-level permissions accumulate via user `Grant` actions. Global pre-authorization levels allow matching operations to proceed without confirmation.
