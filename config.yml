@@ -1,0 +1,66 @@
+# Copy this file to ~/.pai-agent/config.yml and fill in the required values.
+# You can override the default config path with the JVM property:
+#   -Dpai.agent.config.path=/absolute/path/to/config.yml
+
+openai:
+  api:
+    # Required. API key for an OpenAI-compatible endpoint.
+    key: your-openai-api-key
+    # Required. Base URL for the OpenAI-compatible API.
+    baseUrl: https://api.openai.com/v1
+  model:
+    # Required. Model name used for chat completion requests.
+    name:
+    # Total context window size for the selected model.
+    # This value is also used for token display and memory compaction thresholds.
+    token: 128000
+  tool:
+    # Whether the model is allowed to issue multiple tool calls in parallel.
+    parallelCalls: true
+    # Maximum number of tool response characters kept inline in the conversation.
+    # Larger responses are summarized in-chat and written to a file.
+    maxInlineResponseChars: 6000
+    # Directory used to store oversized tool responses.
+    # Leave empty to use the system temporary directory under tool_results.
+    oversizedResponseDir: /tmp/pai-agent/tool-results
+
+memory:
+  compaction:
+    # Context window size used by the compaction strategy.
+    # In most cases, keep this aligned with openai.model.token.
+    contextWindowTokens: 128000
+    # Automatically compact conversation state after reaching this portion
+    # of the configured context window. Valid range: (0, 1].
+    triggerThreshold: 0.9
+    # Maximum number of user-message tokens preserved during compaction.
+    retainedUserMessageMaxTokens: 20000
+
+mcp:
+  # Optional. External MCP servers that can be managed with commands such as
+  # /mcp list and /mcp load.
+  servers:
+    # Example: start a local MCP server over stdio.
+    # - name: filesystem
+    #   transport: stdio
+    #   command: npx
+    #   args:
+    #     - -y
+    #     - '@modelcontextprotocol/server-filesystem'
+    #     - /Users/yourname/workspace
+    #   env: {}
+    #   timeoutMs: 30000
+    #   autoLoad: false
+
+    # Example: connect to a remote MCP server over SSE.
+    # - name: remote-sse
+    #   transport: sse
+    #   url: http://127.0.0.1:8080/sse
+    #   timeoutMs: 30000
+    #   autoLoad: false
+
+    # Example: connect to a remote MCP server over streamable HTTP.
+    # - name: remote-http
+    #   transport: streamable-http
+    #   url: http://127.0.0.1:8080/mcp
+    #   timeoutMs: 30000
+    #   autoLoad: false

@@ -1,0 +1,28 @@
+target
+
+# Ignore hidden directories at any depth.
+**/.*/
+
+# OS-generated files.
+.DS_Store
+
+# Editor swap and temp files.
+*.swp
+*.swo
+*~
+
+# Runtime logs and crash dumps.
+*.log
+hs_err_pid*
+replay_pid*
+
+# Local temp/output directories.
+out/
+tmp/
+temp/
+doc/
+AGENTS.md
+!doc/
+doc/*
+!doc/state-and-session-management.md
+!doc/state-and-session-management-technical-proposal.md
