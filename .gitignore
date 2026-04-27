@@ -20,9 +20,3 @@ replay_pid*
 out/
 tmp/
 temp/
-doc/
-AGENTS.md
-!doc/
-doc/*
-!doc/state-and-session-management.md
-!doc/state-and-session-management-technical-proposal.md
