@@ -29,6 +29,7 @@ import code.chg.agent.lib.memory.ChatMemoryRegion;
 import code.chg.agent.lib.memory.McpToolMemoryRegion;
 import code.chg.agent.lib.memory.PlanMemoryRegion;
 import code.chg.agent.lib.memory.SkillMemoryRegion;
+import code.chg.agent.lib.memory.WorkspaceInstructionMemoryRegion;
 import code.chg.agent.lib.react.ReactAgent;
 import code.chg.agent.lib.session.LocalSessionStoreManager;
 import code.chg.agent.lib.session.SessionRuntimeContext;
@@ -246,6 +247,8 @@ public class PaiAgent implements Agent {
 
     private SessionRuntimeContext buildRuntime(String sessionId, SessionData sessionData) {
         SkillMemoryRegion skillMemoryRegion = new SkillMemoryRegion(skillsManager);
+        WorkspaceInstructionMemoryRegion workspaceInstructionMemoryRegion =
+            new WorkspaceInstructionMemoryRegion(workDir, userHome);
         ChatMemoryRegion chatMemoryRegion = new ChatMemoryRegion();
         PlanMemoryRegion planMemoryRegion = new PlanMemoryRegion();
         LocalEventMessageBus localEventMessageBus = new LocalEventMessageBus(sessionId, Executors.newVirtualThreadPerTaskExecutor());
@@ -265,6 +268,7 @@ public class PaiAgent implements Agent {
                 .bindTools(ApplyPatchTool.class)
                 .bindTools(WebFetchTool.class)
                 .bindMemoryRegion(skillMemoryRegion)
+                .bindMemoryRegion(workspaceInstructionMemoryRegion)
                 .bindMemoryRegion(chatMemoryRegion)
                 .bindMemoryRegion(planMemoryRegion)
                 .bindMemoryRegion(mcpToolMemoryRegion)
