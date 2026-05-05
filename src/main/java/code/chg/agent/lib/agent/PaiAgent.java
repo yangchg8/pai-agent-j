@@ -225,7 +225,7 @@ public class PaiAgent implements Agent {
                 - Skills are local instruction packages stored in `SKILL.md` files.
                 - Global skills directory: `%s`
                 - Workspace skills directory: `%s`
-                - The available skills for the current session are listed in the "Available Skills" section of your context.
+                - The available skills for the current session are listed in the "Skills" section of your context.
                 - If the user names a skill or the task clearly matches a skill description, use that skill by loading its `SKILL.md` with `read_file`.
                 - Resolve any relative paths in a skill relative to its directory.
                 - Do not carry a skill across turns unless the user asks for it again.

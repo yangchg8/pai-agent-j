@@ -1,5 +1,7 @@
 package code.chg.agent.lib.skill;
 
+import code.chg.agent.lib.prompt.SkillPrompts;
+
 import java.util.List;
 
 /**
@@ -20,16 +22,18 @@ public final class SkillRenderer {
             return null;
         }
         StringBuilder sb = new StringBuilder();
-        sb.append("## Available Skills\n");
-        sb.append("The following skills are available. Each entry shows: name – description (file path).\n");
-        sb.append("Use `read_file` on the listed path to load a skill's full instructions when needed.\n\n");
+        sb.append("## Skills\n");
+        sb.append(SkillPrompts.SKILLS_INTRO_WITH_ABSOLUTE_PATHS).append('\n');
+        sb.append("### Available skills\n");
         for (SkillMetadata skill : skills) {
             sb.append("- **").append(skill.name()).append("** – ")
                     .append(skill.description().isEmpty() ? "(no description)" : skill.description())
-                    .append(" (`").append(skill.pathToSkillMd().toString().replace('\\', '/'))
+                    .append(" (file: `").append(skill.pathToSkillMd().toString().replace('\\', '/'))
                     .append("`)");
             sb.append('\n');
         }
+        sb.append("### How to use skills\n");
+        sb.append(SkillPrompts.SKILLS_HOW_TO_USE_WITH_ABSOLUTE_PATHS).append('\n');
         return sb.toString();
     }
 }
