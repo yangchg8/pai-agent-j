@@ -205,7 +205,7 @@ public class PaiAgent implements Agent {
         return "Session: " + runtimeContext.getSessionId()
                 + " | Title: " + title
                 + " | Tokens: " + runtimeContext.getEstimatedTokens() + "/" + OpenAIConfig.getToken()
-                + " | MCP: " + runtimeContext.getMcpToolMemoryRegion().mcpCount();
+                + " | MCP: " + runtimeContext.getMcpToolMemoryRegion().mcpCount() + " | Skills: " + skillsManager.skills().size();
     }
 
     public List<String> drainPendingSystemNotices() {
