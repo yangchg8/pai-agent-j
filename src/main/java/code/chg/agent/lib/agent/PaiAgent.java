@@ -30,6 +30,7 @@ import code.chg.agent.lib.memory.McpToolMemoryRegion;
 import code.chg.agent.lib.memory.PlanMemoryRegion;
 import code.chg.agent.lib.memory.SkillMemoryRegion;
 import code.chg.agent.lib.memory.WorkspaceInstructionMemoryRegion;
+import code.chg.agent.lib.prompt.SystemPrompts;
 import code.chg.agent.lib.react.ReactAgent;
 import code.chg.agent.lib.session.LocalSessionStoreManager;
 import code.chg.agent.lib.session.SessionRuntimeContext;
@@ -212,39 +213,6 @@ public class PaiAgent implements Agent {
         return channelStateSubscriber.drainSystemNotices();
     }
 
-    private static String defaultSystemPrompt(String workDir, String userHome) {
-        String globalSkillDir = userHome + "/.pai-agent/skills";
-        String workspaceSkillDir = workDir + "/.pai-agent/skills";
-        return """
-                You are PaiAgent, a powerful AI coding and task-execution agent.
-                
-                ## Core Capabilities
-                You can reason about complex tasks, write and edit code, run shell commands,
-                manage files, apply patches, fetch web content, and track task progress with plans.
-                
-                ## Skills
-                - Skills are local instruction packages stored in `SKILL.md` files.
-                - Global skills directory: `%s`
-                - Workspace skills directory: `%s`
-                - The available skills for the current session are listed in the "Skills" section of your context.
-                - If the user names a skill or the task clearly matches a skill description, use that skill by loading its `SKILL.md` with `read_file`.
-                - Resolve any relative paths in a skill relative to its directory.
-                - Do not carry a skill across turns unless the user asks for it again.
-                
-                ## Guidelines
-                - Break complex tasks into a plan using the update_plan tool.
-                - Use shell for running commands; prefer rg over grep for search.
-                - Use the `apply_patch` tool to edit files; only use `write_file` for new files or full rewrites.
-                - Do not waste tokens by re-reading files after calling `apply_patch`; if the call failed, fix the patch and retry.
-                - Use `read_file` with start_line/end_line to avoid reading unnecessarily large files.
-                - If a tool says its result was redirected to a file in `temp/`, use `read_file` on that path and prefer line ranges.
-                - Always set the workdir parameter when invoking the shell tool.
-                - When searching for text or files, prefer `rg` or `rg --files`.
-                - Prefer targeted, minimal changes that accomplish the task without unnecessary side effects.
-                - After completing a task, summarize what was done and suggest next steps when appropriate.
-                """.formatted(globalSkillDir, workspaceSkillDir);
-    }
-
     private SessionRuntimeContext buildRuntime(String sessionId, SessionData sessionData) {
         SkillMemoryRegion skillMemoryRegion = new SkillMemoryRegion(skillsManager);
         WorkspaceInstructionMemoryRegion workspaceInstructionMemoryRegion =
@@ -255,7 +223,7 @@ public class PaiAgent implements Agent {
         McpToolMemoryRegion mcpToolMemoryRegion = new McpToolMemoryRegion(localEventMessageBus);
 
         ReactAgent agent = ReactAgent.builder("PaiAgent")
-                .systemPrompt(defaultSystemPrompt(workDir, userHome))
+            .systemPrompt(SystemPrompts.paiAgentSystemPrompt())
                 .globalPermissionLevel(Permission.READ)
                 .globalPermission("FILE:" + workDir + "/**", List.of(Permission.ALL))
                 .globalPermission("DIR:" + workDir + "/**", List.of(Permission.ALL))
