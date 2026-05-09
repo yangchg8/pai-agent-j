@@ -34,4 +34,9 @@ public class ContentLLMMessage implements LLMMessage {
     public MessageType type() {
         return type;
     }
+
+    @Override
+    public String content() {
+        return content;
+    }
 }

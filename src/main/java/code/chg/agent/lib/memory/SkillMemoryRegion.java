@@ -16,9 +16,12 @@ import java.util.List;
 /**
  * @author yangchg <yangchg314@gmail.com>
  * @title SkillMemoryRegion
- * @description Injects the list of available skills into the system context so the LLM
+ * @description Injects the list of available skills into the system context so
+ *              the LLM
  */
 public class SkillMemoryRegion implements MemoryRegion {
+    private final String SKILL_INSTRUCTIONS_START_TAG = "<skills_instructions>";
+    private final String SKILL_INSTRUCTIONS_END_TAG = "</skills_instructions>";
     private final SkillsManager skillsManager;
 
     public SkillMemoryRegion(SkillsManager skillsManager) {
@@ -46,7 +49,7 @@ public class SkillMemoryRegion implements MemoryRegion {
         return List.of(new LLMMessage() {
             @Override
             public String content() {
-                return content;
+                return SKILL_INSTRUCTIONS_START_TAG + content + SKILL_INSTRUCTIONS_END_TAG;
             }
 
             @Override
